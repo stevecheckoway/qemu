@@ -29,6 +29,9 @@ DEF_HELPER_1(aas, void, env)
 DEF_HELPER_1(daa, void, env)
 DEF_HELPER_1(das, void, env)
 
+DEF_HELPER_4(limit_check, void, env, tl, i32, i32)
+DEF_HELPER_4(limit_write_check, void, env, tl, i32, i32)
+
 DEF_HELPER_2(lsl, tl, env, tl)
 DEF_HELPER_2(lar, tl, env, tl)
 DEF_HELPER_2(verr, void, env, tl)

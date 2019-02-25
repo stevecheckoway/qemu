@@ -2441,6 +2441,38 @@ void helper_sysexit(CPUX86State *env, int dflag)
     env->eip = env->regs[R_EDX];
 }
 
+void helper_limit_check(CPUX86State *env, target_ulong offset, uint32_t seg,
+                        uint32_t access_limit)
+{
+    uint32_t flags = env->segs[seg].flags;
+    uint32_t limit = env->segs[seg].limit;
+    if ((flags & DESC_CS_MASK) || !(flags & DESC_E_MASK)) {
+        /* Code segment or normal data segment. */
+        if (likely(access_limit <= limit) &&
+            likely(offset <= limit - access_limit)) {
+            return;
+        }
+    } else {
+        /* Expand down data segment. */
+        if (likely(offset <= 0xffffffff - access_limit) &&
+            likely(offset > limit)) {
+            return;
+        }
+    }
+    raise_exception(env, seg == R_SS ? EXCP0C_STACK : EXCP0D_GPF);
+}
+
+void helper_limit_write_check(CPUX86State *env, target_ulong offset,
+                              uint32_t seg, uint32_t access_limit)
+{
+    if (likely((env->segs[seg].flags & (DESC_CS_MASK | DESC_W_MASK)) ==
+               DESC_W_MASK)) {
+        helper_limit_check(env, offset, seg, access_limit);
+        return;
+    }
+    raise_exception(env, EXCP0D_GPF);
+}
+
 target_ulong helper_lsl(CPUX86State *env, target_ulong selector1)
 {
     unsigned int limit;
