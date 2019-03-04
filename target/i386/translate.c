@@ -4794,7 +4794,7 @@ static target_ulong disas_insn(DisasContext *s, CPUState *cpu)
                     s->rip_offset = 1;
                 else
                     s->rip_offset = insn_const_size(ot);
-                gen_lea_modrm(env, s, modrm, 1U << ot, 1);
+                gen_lea_modrm(env, s, modrm, 1U << ot, op < 7);
                 opreg = OR_TMP0;
             } else {
                 opreg = rm;
